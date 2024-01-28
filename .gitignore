@@ -1,5 +1,3 @@
-babel-server
-babel-client
 cmake*
 !CMakeLists.txt
 
