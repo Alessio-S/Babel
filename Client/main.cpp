@@ -32,14 +32,9 @@ int main() {
                 client.sendTcpMessage(message);
             }
         }
-        // AudioStream audioStream(callback);
-        // audioStream.recordMicrophone();
-        // Pa_Sleep(10000);
-        // audioStream.stopRecord();
 
         client.getReadTcpThread().join();
         client.getReadUdpThread().join();
-        // client.getAudioThread().join();
         thread.join();
     } catch (const std::exception& e) {
         std::cerr << "Exception: " << e.what() << std::endl;

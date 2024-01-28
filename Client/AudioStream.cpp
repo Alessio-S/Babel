@@ -32,6 +32,16 @@ AudioStream::AudioStream(std::function<void (AudioStream *, const float *, float
         throw std::runtime_error("Can't initialize audio stream");
 }
 
+AudioStream::~AudioStream()
+{
+    if (_stream) {
+        if (_recording)
+            stopRecord();
+        Pa_CloseStream(_stream);
+    }
+    Pa_Terminate();
+}
+
 void AudioStream::recordMicrophone()
 {
     PaError result = Pa_StartStream(_stream);
@@ -46,16 +56,6 @@ void AudioStream::stopRecord()
     if (result != paNoError)
         throw std::runtime_error("Can't stop audio stream");
     _recording = false;
-}
-
-AudioStream::~AudioStream()
-{
-    if (_stream) {
-        if (_recording)
-            stopRecord();
-        Pa_CloseStream(_stream);
-    }
-    Pa_Terminate();
 }
 
 int AudioStream::callCallback(const void *input, void *output, unsigned long frameCount, const PaStreamCallbackTimeInfo *timeInfo, PaStreamCallbackFlags statusFlags, void *userData)
