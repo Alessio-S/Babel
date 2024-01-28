@@ -14,11 +14,13 @@ Session::~Session()
     _socket.close();
 }
 
-void Session::setClientData(std::string username)
+void Session::setClientData(std::string data)
 {
+    std::string udp_port = data.substr(0, data.find(","));
+    std::string username = data.substr(data.find(",") + 1);
     _client.username = username;
 	_client.code = std::to_string(std::rand() % 1000 + 4000);
-	_client.port = _socket.remote_endpoint().port();
+	_client.port = std::stoi(udp_port);
     _client.connected = true;
 }
 
@@ -54,17 +56,21 @@ void Session::handleRead(const boost::system::error_code& error, size_t bytes_tr
         // Process the received data and decide what to do
         std::string received_data(_data, bytes_transferred);
         received_data = regularizeResponse(received_data);
-        
         if (!_client.connected) {
             setClientData(received_data);
             ServerTcp::GetInstance()->addClient(_client);
+            writeResponse("Client connected\n");
             handleRead(error, bytes_transferred);
         } else {
-            // std::cout << "Received data: " << received_data << std::endl;
-            // // Write the response back to the client
-            // std::string response = _client.username + ": " + received_data + "\n";
-            // writeResponse(response);
-            printClients();
+            if  (received_data == "clients")
+                printClients();
+            if (received_data.starts_with("UDP_PORT:")) {
+                unsigned short udp_port = ServerTcp::GetInstance()->getAvailableClient(std::stoi(received_data.substr(10)));
+                if (udp_port != -1) {
+                    std::string response = "UDP_PORT:" + std::to_string(udp_port) + "\n";
+                    writeResponse(response);
+                }
+            }
         }
     } else if (error == boost::asio::error::eof) {
         std::cout << "Client disconnected" << std::endl;

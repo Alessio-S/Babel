@@ -21,5 +21,5 @@ file(GLOB CLIENT_SOURCES "*.cpp")
 add_executable(babel-client ${CLIENT_SOURCES})
 
 # Link SFML libraries to your executable
-# target_link_libraries(r-type_client sfml-main sfml-system sfml-window sfml-graphics sfml-audio)
+target_link_libraries(babel-client portaudio)
 # target_link_libraries(r-type_client ${Boost_LIBRARIES})

@@ -24,6 +24,27 @@ void ServerTcp::addClient(ClientData client)
 	std::cout << "Client added" << std::endl;
 }
 
+void ServerTcp::removeClient(ClientData client)
+{
+	for (auto it = _clients.begin(); it != _clients.end(); ++it) {
+		if (it->port == client.port) {
+			_clients.erase(it);
+			std::cout << "Client removed" << std::endl;
+			return;
+		}
+	}
+}
+
+unsigned short ServerTcp::getAvailableClient(unsigned short port)
+{
+	for (auto it = _clients.begin(); it != _clients.end(); ++it) {
+		if (it->port == port)
+			return it->port;
+	}
+	std::cout << "No available client on port: " << port << std::endl;
+	return -1;
+}
+
 void ServerTcp::startAccept()
 {
     Session::pointer newSession = Session::create(_io_context);

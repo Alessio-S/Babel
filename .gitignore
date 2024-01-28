@@ -1,9 +1,11 @@
-babel
+babel-server
+babel-client
 cmake*
 !CMakeLists.txt
 
 Makefile
 
 boost
+portaudio
 
 .vscode

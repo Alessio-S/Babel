@@ -27,6 +27,8 @@ class ServerTcp {
 
         std::vector<ClientData> &getClients() { return _clients; };
         void addClient(ClientData client);
+        void removeClient(ClientData client);
+        unsigned short getAvailableClient(unsigned short port);
 
     private:
         static ServerTcp* _instance;

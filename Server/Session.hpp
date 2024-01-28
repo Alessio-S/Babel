@@ -39,6 +39,7 @@ class Session : public boost::enable_shared_from_this<Session> {
         void writeResponse(const std::string& response);
         std::string regularizeResponse(const std::string& response);
         void printClients();
+        
 
     protected:
     private:
