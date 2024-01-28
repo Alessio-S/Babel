@@ -64,7 +64,7 @@ void Session::handleRead(const boost::system::error_code& error, size_t bytes_tr
         } else {
             if  (received_data == "clients")
                 printClients();
-            if (received_data.starts_with("UDP_PORT:")) {
+            if (received_data.find("UDP_PORT:") == 0) {
                 unsigned short udp_port = ServerTcp::GetInstance()->getAvailableClient(std::stoi(received_data.substr(10)));
                 if (udp_port != -1) {
                     std::string response = "UDP_PORT:" + std::to_string(udp_port) + "\n";
@@ -76,7 +76,7 @@ void Session::handleRead(const boost::system::error_code& error, size_t bytes_tr
         std::cout << "Client disconnected" << std::endl;
         _client.connected = false;
         _socket.cancel();
-        // _socket.close();
+        ServerTcp::GetInstance()->removeClient(_client);
     } else {
         std::cerr << "Error reading data: " << error.message() << std::endl;
     }

@@ -87,12 +87,16 @@ void Client::startCall()
 
 void Client::sendAudioStream(std::vector<float> audioStream)
 {
+    size_t size = audioStream.size();
+    _udp_socket.send_to(boost::asio::buffer(&size, sizeof(size)), _udp_endpoint);
     _udp_socket.send_to(boost::asio::buffer(audioStream), _udp_endpoint);
 }
 
 std::vector<float> Client::readAudioStream()
 {
-    std::vector<float> audioStream;
+    size_t size = 0;
+    _udp_socket.receive_from(boost::asio::buffer(&size, sizeof(size)), _udp_endpoint);
+    std::vector<float> audioStream(size);
     _udp_socket.receive_from(boost::asio::buffer(audioStream), _udp_endpoint);
     return audioStream;
 }

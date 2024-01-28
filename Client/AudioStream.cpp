@@ -27,7 +27,7 @@ AudioStream::AudioStream(std::function<void (AudioStream *, const float *, float
     outputParameters.sampleFormat = paFloat32;
     outputParameters.suggestedLatency = outputInfo->defaultLowOutputLatency;
     outputParameters.hostApiSpecificStreamInfo = nullptr;
-    PaError result = Pa_OpenStream(&_stream, &inputParameters, &outputParameters, 44100, 0, paClipOff, callCallback, this);
+    PaError result = Pa_OpenStream(&_stream, &inputParameters, &outputParameters, 44100, 1050, paNoFlag, callCallback, this);
     if (result != paNoError)
         throw std::runtime_error("Can't initialize audio stream");
 }
