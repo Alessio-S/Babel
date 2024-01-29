@@ -39,50 +39,62 @@ void Client::sendTcpMessage(const std::string& message) {
 }
 
 void Client::readTcpMessage() {
-    boost::asio::streambuf buffer;
-    boost::asio::read_until(_tcp_socket, buffer, "\n");
-    std::string message = boost::asio::buffer_cast<const char*>(buffer.data());
+    try {
+        boost::asio::streambuf buffer;
+        boost::asio::read_until(_tcp_socket, buffer, "\n");
+        std::string message = boost::asio::buffer_cast<const char*>(buffer.data());
 
-    if (message == "Hello\n")
-        sendTcpMessage("Hello from Client to Server!\n");
-    else if (message.find("UDP_PORT:") == 0) {
-        std::string udp_port = message.substr(9, message.size() - 10);
-        setUdpConnection(std::stoi(udp_port));
-    } else {
-        std::cout << message << std::endl;
+        if (message == "Hello\n")
+            sendTcpMessage("Hello from Client to Server!\n");
+        else if (message.find("UDP_PORT") == 0) {
+            std::string udp_port = message.substr(9, message.size() - 10);
+            setUdpConnection(std::stoi(udp_port));
+        } else {
+            std::cout << message << std::endl;
+        }
+        readTcpMessage();
+    } catch (boost::system::system_error& e) {
+        std::cout << "Disconnected from server" << std::endl;
+        _tcp_socket.cancel();
+        _udp_socket.cancel();
+        _udp_connection = false;
+        return;
     }
-    readTcpMessage();
 }
 
 void Client::readUdpMessage()
 {
     while (true) {
-        char data[1024];
-        size_t length = _udp_socket.receive_from(boost::asio::buffer(data), _udp_endpoint);
-        std::string message(data, length);
+        try {
+            char data[1024];
+            size_t length = _udp_socket.receive_from(boost::asio::buffer(data), _udp_endpoint);
+            std::string message(data, length);
 
-        if (message == "CALL\n")
-            startCall();
-        else 
-            std::cout << message << std::endl;
+            if (message == "CALL\n")
+                startCall();
+            else 
+                std::cout << message << std::endl;
+        } catch (const std::exception& e) {
+            std::cerr << "Exception: " << e.what() << std::endl;
+        }
     }
 }
 
 void Client::startCall()
 {
     std::cout << "Call started" << std::endl;
-    AudioStream audioStream([this](AudioStream *stream, const float *inputBuffer, float *outputBuffer, unsigned long frameCount) {
-        std::vector<float> inputStream;
-        inputStream.reserve(frameCount);
-        inputStream.insert(inputStream.end(), inputBuffer, inputBuffer + frameCount);
-        sendAudioStream(inputStream);
-        std::vector<float> audioStream = readAudioStream();
-        std::copy(audioStream.begin(), audioStream.end(), outputBuffer);
-    });
-    audioStream.recordMicrophone();
-    while (true) {
-        Pa_Sleep(10000);
-    }
+    // AudioStream audioStream([this](AudioStream *stream, const float *inputBuffer, float *outputBuffer, unsigned long frameCount) {
+    //     std::vector<float> inputStream;
+    //     inputStream.reserve(frameCount);
+    //     inputStream.insert(inputStream.end(), inputBuffer, inputBuffer + frameCount);
+    //     sendAudioStream(inputStream);
+    //     std::vector<float> audioStream = readAudioStream();
+    //     std::copy(audioStream.begin(), audioStream.end(), outputBuffer);
+    // });
+    // audioStream.recordMicrophone();
+    // while (true) {
+    //     Pa_Sleep(10000);
+    // }
 }
 
 void Client::sendAudioStream(std::vector<float> audioStream)

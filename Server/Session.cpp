@@ -53,23 +53,24 @@ void Session::start()
 
 void Session::handleRead(const boost::system::error_code& error, size_t bytes_transferred) {
     if (!error) {
-        // Process the received data and decide what to do
         std::string received_data(_data, bytes_transferred);
         received_data = regularizeResponse(received_data);
         if (!_client.connected) {
             setClientData(received_data);
             ServerTcp::GetInstance()->addClient(_client);
             writeResponse("Client connected\n");
-            handleRead(error, bytes_transferred);
         } else {
-            if  (received_data == "clients")
+            if  (received_data == "CLIENTS")
                 printClients();
-            if (received_data.find("UDP_PORT:") == 0) {
-                unsigned short udp_port = ServerTcp::GetInstance()->getAvailableClient(std::stoi(received_data.substr(10)));
-                if (udp_port != -1) {
-                    std::string response = "UDP_PORT:" + std::to_string(udp_port) + "\n";
+            else if (received_data.find("UDP_PORT") == 0) {
+                unsigned short input_udp_port = std::stoi(received_data.substr(9));
+                unsigned short available_udp_port = ServerTcp::GetInstance()->getAvailableClient(input_udp_port);
+                if (available_udp_port != -1) {
+                    std::string response = "UDP_PORT " + std::to_string(available_udp_port) + "\n";
                     writeResponse(response);
                 }
+            } else {
+                writeResponse("Unknown command\n");
             }
         }
     } else if (error == boost::asio::error::eof) {
@@ -100,9 +101,9 @@ std::string Session::regularizeResponse(const std::string &response)
 
 void Session::printClients()
 {
-    std::string response = "Clients: \n";
+    std::string response = "";
     for (auto &client : ServerTcp::GetInstance()->getClients()) {
-        response += "\t" + client.username + "#" + client.code + "(" + std::to_string(client.port) + ")";
+        response += client.username + "#" + client.code + "(" + std::to_string(client.port) + ")";
         if (client.connected)
             response += " - Connected\n";
         else

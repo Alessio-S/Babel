@@ -32,10 +32,11 @@ int main() {
                 client.sendTcpMessage(message);
             }
         }
-
         client.getReadTcpThread().join();
         client.getReadUdpThread().join();
         thread.join();
+    } catch (boost::system::system_error& e) {
+        return 1;
     } catch (const std::exception& e) {
         std::cerr << "Exception: " << e.what() << std::endl;
         return 1;
