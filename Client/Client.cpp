@@ -83,18 +83,18 @@ void Client::readUdpMessage()
 void Client::startCall()
 {
     std::cout << "Call started" << std::endl;
-    // AudioStream audioStream([this](AudioStream *stream, const float *inputBuffer, float *outputBuffer, unsigned long frameCount) {
-    //     std::vector<float> inputStream;
-    //     inputStream.reserve(frameCount);
-    //     inputStream.insert(inputStream.end(), inputBuffer, inputBuffer + frameCount);
-    //     sendAudioStream(inputStream);
-    //     std::vector<float> audioStream = readAudioStream();
-    //     std::copy(audioStream.begin(), audioStream.end(), outputBuffer);
-    // });
-    // audioStream.recordMicrophone();
-    // while (true) {
-    //     Pa_Sleep(10000);
-    // }
+    AudioStream audioStream([this](AudioStream *stream, const float *inputBuffer, float *outputBuffer, unsigned long frameCount) {
+        std::vector<float> inputStream;
+        inputStream.reserve(frameCount);
+        inputStream.insert(inputStream.end(), inputBuffer, inputBuffer + frameCount);
+        sendAudioStream(inputStream);
+        std::vector<float> audioStream = readAudioStream();
+        std::copy(audioStream.begin(), audioStream.end(), outputBuffer);
+    });
+    audioStream.recordMicrophone();
+    while (true) {
+        Pa_Sleep(10000);
+    }
 }
 
 void Client::sendAudioStream(std::vector<float> audioStream)
